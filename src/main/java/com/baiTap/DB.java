@@ -14,6 +14,15 @@ public class DB {
         return DriverManager.getConnection(url, username, password);
     }
 
+    public String get(String attribute) {
+        switch (attribute) {
+            case "username": return username;
+            case "password": return password;
+            case "url": return url;
+            default: return null;
+        }
+    }
+
     public void test() {
         try (Connection con = getConnection()) {
             System.out.println("Kết nối thành công!");

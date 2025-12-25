@@ -30,9 +30,7 @@ public class frmLogin extends JFrame {
     
     // Database connection
     private Connection conn;
-    private final String DB_URL = "jdbc:mysql://localhost:3306/QLBanHangSieuThi";
-    private final String USER = "root";
-    private final String PASS = "";
+    private DB db = new DB();
     
     // Thông tin user đã đăng nhập
     public static int maTK;
@@ -132,8 +130,8 @@ public class frmLogin extends JFrame {
     // Kết nối database
     private void connectDatabase() {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            Class.forName("org.mariadb.jdbc.Driver");
+            conn = DriverManager.getConnection(db.get("url"), db.get("username"), db.get("password"));
             System.out.println("Kết nối database thành công!");
         } catch (ClassNotFoundException e) {
             JOptionPane.showMessageDialog(this, "Không tìm thấy driver MySQL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
