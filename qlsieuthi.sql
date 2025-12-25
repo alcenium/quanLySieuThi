@@ -7,11 +7,12 @@ Drop Table If Exists taiKhoan;
 Create Table taiKhoan (
     maTK int auto_increment primary key not null,
     tenTK varchar(32),
-    matKhau varchar(64));
+    matKhau varchar(64),
+    chucVu varchar(8));
 
 Drop Table If Exists khachHang;
 Create Table khachHang (
-    maKH int unique,
+    maKH int auto_increment primary key not null,
     ten varchar(32),
     sdt varchar(12),
     diachi varchar(128),
@@ -32,14 +33,38 @@ Create Table danhMuc (
     maDM int auto_increment primary key not null,
     tenDM varchar(32));
 
+Drop Table If Exists nhaCungCap;
+Create Table nhaCungCap (
+    maNCC int auto_increment primary key not null,
+    tenNCC varchar(32),
+    diaChi varchar(64),
+    thanhPho varchar(32));
+
 Drop Table If Exists sanPham;
 Create Table sanPham (
     maSP int auto_increment primary key not null,
     maDM int,
+    maNCC int,
     tenSP varchar(32),
     gia int,
     soLuong int,
-    Foreign Key (maDM) References danhMuc(maDM) On Delete Cascade);
+    Foreign Key (maDM) References danhMuc(maDM) On Delete Cascade,
+    Foreign Key (maNCC) References nhaCungCap(maNCC) On Delete Cascade);
+
+Drop Table If Exists khuyenMai;
+Create Table khuyenMai (
+    maKhM int auto_increment primary key not null,
+    tenKhM varchar(32),
+    phanTramGiam int,
+    ngayHieuLuc date,
+    ngayKetThuc date);
+
+Drop Table If Exists spKhuyenMai;
+Create Table spKhuyenMai (
+    maSP int,
+    maKhM int,
+    Foreign Key (maSP) References sanPham(maSP) On Delete Cascade,
+    Foreign Key (maKhM) References khuyenMai(maKhM) On Delete Cascade);
 
 Drop Table If Exists giaoHang;
 create table giaoHang (
@@ -47,14 +72,14 @@ create table giaoHang (
     maKH int,
     ngayTao date,
     tinhTrang varchar(16),
-    foreign key (maKH) references khachHang(maKH));
+    foreign key (maKH) references khachHang(maKH) on delete cascade);
 
 Drop Table If Exists hoaDon;
 Create Table hoaDon (
     maHoaDon int auto_increment primary key not null,
     maNV int,
     ngayThanhToan date,
-    foreign key (maNV) references nhanVien(maNV));
+    foreign key (maNV) references nhanVien(maNV) on delete cascade);
 
 Drop Table If Exists gioHang;
 Create Table gioHang (
@@ -69,6 +94,8 @@ Create Table item_giaoHang (
     maGiaoHang int,
     maSP int,
     soLuong int,
+    maKhM int,
+    foreign key (maKhM) references khuyenMai(maKhM) On Delete Cascade,
     foreign key (maGiaoHang) references giaoHang(maGiaoHang) On Delete Cascade,
     foreign key (maSP) references sanPham(maSP) On Delete Cascade);
 
@@ -78,6 +105,8 @@ Create Table item_gioHang (
     maGioHang int,
     maSP int,
     soLuong int,
+    maKhM int,
+    foreign key (maKhM) references khuyenMai(maKhM) On Delete Cascade,
     foreign key (maGioHang) references gioHang(maGioHang) On Delete Cascade,
     foreign key (maSP) references sanPham(maSP) On Delete Cascade);
 
@@ -85,134 +114,126 @@ Drop Table If Exists item_hoaDon;
 Create Table item_hoaDon (
     maItemHoaDon int auto_increment primary key not null,
     maHoaDon int,
-    maSP int,
+    tenSP varchar(32),
+    gia int,
     soLuong int,
-    foreign key (maHoaDon) references hoaDon(maHoaDon) On Delete Cascade,
-    foreign key (maSP) references sanPham(maSP) On Delete Cascade);
+    phanTramGiam int,
+    foreign key (maHoaDon) references hoaDon(maHoaDon) On Delete Cascade);
 
 -- ========== Dữ liệu mẫu ==========
 -- Tài khoản
-INSERT INTO taiKhoan (tenTK, matKhau) VALUES
-('admin', '123456'),
-('tranthib', 'password123'),
-('levanc', 'password123'),
-('phamthid', 'password123'),
-('hoangvane', 'password123'),
-('admin01', 'admin123'),
-('nhanvien02', 'nv123'),
-('nhanvien03', 'nv123'),
-('nhanvien04', 'nv123'),
-('nhanvien05', 'nv123');
+Insert Into taiKhoan (tenTK, matKhau) Values
+('nv001', 'nv123456'),
+('nv002', 'nv789012'),
+('nv003', 'nv345678'),
+('nv004', 'nv901234'),
+('nv005', 'nv567890'),
+('admin', '123456');
 
 -- Khách hàng
-INSERT INTO khachHang (maKH, ten, sdt, diachi) VALUES
-(1, 'Nguyễn Văn An', '0901234567', '123 Đường Nguyễn Huệ, Quận 1, TP.HCM'),
-(2, 'Trần Thị Bình', '0912345678', '456 Đường Lê Lợi, Quận 3, TP.HCM'),
-(3, 'Lê Văn Cường', '0923456789', '789 Đường Trần Hưng Đạo, Quận 5, TP.HCM'),
-(4, 'Phạm Thị Dung', '0934567890', '321 Đường Hai Bà Trưng, Quận 10, TP.HCM'),
-(5, 'Hoàng Văn Em', '0945678901', '654 Đường Võ Văn Tần, Quận Bình Thạnh, TP.HCM');
+Insert Into khachHang (maKH, ten, sdt, diachi) Values
+(1, 'Nguyễn Văn An', '0912345678', '123 Phố Huế, Hai Bà Trưng, Hà Nội'),
+(2, 'Trần Thị Bình', '0923456789', '45 Đường Láng, Đống Đa, Hà Nội'),
+(3, 'Lê Văn Cường', '0934567890', '78 Nguyễn Trãi, Thanh Xuân, Hà Nội'),
+(4, 'Phạm Thị Dung', '0945678901', '12 Giải Phóng, Hoàng Mai, Hà Nội'),
+(5, 'Hoàng Văn Em', '0956789012', '234 Trường Chinh, Thanh Xuân, Hà Nội');
 
 -- Nhân viên
-INSERT INTO nhanVien (maNV, ten, ngaySinh, gioiTinh, sdt, diaChi) VALUES
-(6, 'Nguyễn Thị Hoa', '1990-05-15', 'Nữ', '0956789012', '111 Đường Cách Mạng Tháng 8, Quận Tân Bình, TP.HCM'),
-(7, 'Trần Văn Kiên', '1988-08-20', 'Nam', '0967890123', '222 Đường Lý Thường Kiệt, Quận 11, TP.HCM'),
-(8, 'Lê Thị Lan', '1992-03-10', 'Nữ', '0978901234', '333 Đường Phan Đình Phùng, Quận Phú Nhuận, TP.HCM'),
-(9, 'Phạm Văn Minh', '1985-12-25', 'Nam', '0989012345', '444 Đường Điện Biên Phủ, Quận 3, TP.HCM'),
-(10, 'Hoàng Thị Nga', '1995-07-30', 'Nữ', '0990123456', '555 Đường Hoàng Văn Thụ, Quận Tân Bình, TP.HCM');
+Insert Into nhanVien (maNV, ten, ngaySinh, gioiTinh, sdt, diaChi) Values
+(1, 'Đỗ Thị Hoa', '1995-03-15', 'Nữ', '0967890123', '56 Xã Đàn, Đống Đa, Hà Nội'),
+(2, 'Vũ Văn Hùng', '1992-07-20', 'Nam', '0978901234', '89 Láng Hạ, Ba Đình, Hà Nội'),
+(3, 'Ngô Thị Lan', '1998-11-08', 'Nữ', '0989012345', '23 Kim Mã, Ba Đình, Hà Nội'),
+(4, 'Bùi Văn Minh', '1994-05-25', 'Nam', '0990123456', '67 Tây Sơn, Đống Đa, Hà Nội'),
+(5, 'Đinh Thị Nga', '1996-09-12', 'Nữ', '0901234567', '145 Chùa Bộc, Đống Đa, Hà Nội');
 
--- Danh mục sản phẩm
-INSERT INTO danhMuc (tenDM) VALUES
+-- Danh mục
+Insert Into danhMuc (tenDM) Values
 ('Thực phẩm tươi sống'),
-('Thực phẩm đóng hộp'),
 ('Đồ uống'),
+('Bánh kẹo'),
 ('Gia vị'),
 ('Đồ dùng gia đình'),
-('Vệ sinh cá nhân'),
-('Văn phòng phẩm');
+('Chăm sóc cá nhân');
+
+-- Nhà cung cấp
+Insert Into nhaCungCap (tenNCC, diaChi, thanhPho) Values
+('Công ty TNHH Thực phẩm Sạch', '45 Minh Khai, Hai Bà Trưng', 'Hà Nội'),
+('Công ty CP Đồ uống Việt', '78 Phạm Ngọc Thạch, Đống Đa', 'Hà Nội'),
+('Công ty TNHH Bánh kẹo Hà Nội', '123 Giảng Võ, Ba Đình', 'Hà Nội'),
+('Công ty CP Gia vị Việt Nam', '56 Lê Duẩn, Hoàn Kiếm', 'Hà Nội'),
+('Công ty TNHH Hóa mỹ phẩm', '89 Nguyễn Chí Thanh, Đống Đa', 'Hà Nội');
 
 -- Sản phẩm
-INSERT INTO sanPham (maDM, tenSP, gia, soLuong) VALUES
--- Thực phẩm tươi sống
-(1, 'Thịt heo ba chỉ', 85000, 50),
-(1, 'Thịt bò nạm', 180000, 30),
-(1, 'Cá hồi Na Uy', 250000, 20),
-(1, 'Rau cải xanh', 15000, 100),
-(1, 'Cà chua', 20000, 80),
--- Thực phẩm đóng hộp
-(2, 'Mì gói Hảo Hảo', 3500, 500),
-(2, 'Cơm hộp SG Food', 25000, 200),
-(2, 'Thịt hộp Spam', 65000, 150),
-(2, 'Cá ngừ đóng hộp', 35000, 180),
--- Đồ uống
-(3, 'Coca Cola 1.5L', 18000, 300),
-(3, 'Nước suối Lavie', 5000, 500),
-(3, 'Trà xanh C2', 10000, 400),
-(3, 'Bia Heineken', 22000, 250),
-(3, 'Sữa tươi Vinamilk', 32000, 200),
--- Gia vị
-(4, 'Muối i-ốt', 8000, 300),
-(4, 'Đường trắng', 20000, 250),
-(4, 'Nước mắm Nam Ngư', 35000, 200),
-(4, 'Dầu ăn Simply', 45000, 180),
--- Đồ dùng gia đình
-(5, 'Bột giặt OMO', 120000, 100),
-(5, 'Nước rửa chén Sunlight', 35000, 150),
-(5, 'Giấy vệ sinh Pulppy', 45000, 200),
-(5, 'Bàn chải đánh răng PS', 25000, 180),
--- Vệ sinh cá nhân
-(6, 'Dầu gội Clear', 85000, 120),
-(6, 'Sữa tắm Dove', 95000, 100),
-(6, 'Kem đánh răng Colgate', 35000, 200),
--- Văn phòng phẩm
-(7, 'Bút bi Thiên Long', 5000, 500),
-(7, 'Vở kẻ ngang', 12000, 300),
-(7, 'Bút chì 2B', 3000, 400);
+Insert Into sanPham (maDM, maNCC, tenSP, gia, soLuong) Values
+(1, 1, 'Thịt heo ba chỉ', 120000, 50),
+(1, 1, 'Cá thu tươi', 150000, 30),
+(1, 1, 'Rau cải xanh', 15000, 100),
+(2, 2, 'Nước ngọt Coca Cola', 10000, 200),
+(2, 2, 'Bia Hà Nội', 12000, 150),
+(2, 2, 'Nước khoáng Lavie', 5000, 300),
+(3, 3, 'Bánh quy Cosy', 25000, 80),
+(3, 3, 'Kẹo Alpenliebe', 35000, 60),
+(3, 3, 'Bánh snack Oishi', 8000, 120),
+(4, 4, 'Nước mắm Nam Ngư', 45000, 70),
+(4, 4, 'Dầu ăn Simply', 55000, 90),
+(4, 4, 'Muối I-ốt', 8000, 150),
+(5, 5, 'Nước rửa chén Sunlight', 32000, 100),
+(5, 5, 'Bột giặt OMO', 95000, 60),
+(6, 5, 'Dầu gội Head & Shoulders', 120000, 50),
+(6, 5, 'Kem đánh răng PS', 28000, 80);
+
+-- Khuyến mãi
+Insert Into khuyenMai (tenKhM, phanTramGiam, ngayHieuLuc, ngayKetThuc) Values
+('Giảm giá cuối tuần', 10, '2024-12-20', '2024-12-22'),
+('Khuyến mãi Noel', 15, '2024-12-24', '2024-12-26'),
+('Giảm giá đầu năm', 20, '2025-01-01', '2025-01-07'),
+('Flash sale', 25, '2024-12-23', '2024-12-23');
+
+-- Sản phẩm khuyến mãi
+Insert Into spKhuyenMai (maSP, maKhM) Values
+(1, 1), (2, 1), (4, 2), (5, 2), (7, 2), (8, 2),
+(10, 3), (11, 3), (13, 4), (14, 4), (15, 4);
 
 -- Giỏ hàng
-INSERT INTO gioHang (maKH, ngayTao) VALUES
+Insert Into gioHang (maKH, ngayTao) Values
 (1, '2024-12-20'),
 (2, '2024-12-21'),
 (3, '2024-12-22');
 
--- Items trong giỏ hàng
-INSERT INTO item_gioHang (maGioHang, maSP, soLuong) VALUES
-(1, 1, 2),   -- 2 kg thịt heo
-(1, 10, 3),  -- 3 chai Coca
-(1, 11, 5),  -- 5 chai nước suối
-(2, 3, 1),   -- 1 kg cá hồi
-(2, 14, 2),  -- 2 hộp sữa tươi
-(3, 6, 10),  -- 10 gói mì
-(3, 20, 2);  -- 2 bột giặt
+-- Item giỏ hàng
+Insert Into item_gioHang (maGioHang, maSP, soLuong, maKhM) Values
+(1, 1, 2, 1),
+(1, 4, 3, NULL),
+(2, 7, 5, 2),
+(2, 10, 1, NULL),
+(3, 13, 2, NULL);
 
--- Giao hàng (với tình trạng)
-INSERT INTO giaoHang (maKH, ngayTao, tinhTrang) VALUES
+-- Giao hàng
+Insert Into giaoHang (maKH, ngayTao, tinhTrang) Values
 (1, '2024-12-18', 'Đã giao'),
-(2, '2024-12-19', 'Đã giao'),
-(4, '2024-12-20', 'Đang giao'),
-(5, '2024-12-21', 'Chờ xử lý');
+(2, '2024-12-19', 'Đang giao'),
+(4, '2024-12-21', 'Chờ xử lý'),
+(5, '2024-12-22', 'Đang giao');
 
--- Items giao hàng
-INSERT INTO item_giaoHang (maGiaoHang, maSP, soLuong) VALUES
-(1, 1, 1),   -- Order 1: thịt heo
-(1, 10, 2),  -- Order 1: 2 coca
-(1, 15, 1),  -- Order 1: muối
-(2, 3, 1),   -- Order 2: cá hồi
-(2, 14, 3),  -- Order 2: 3 sữa tươi
-(3, 6, 5),   -- Order 3: 5 gói mì
-(3, 20, 1),  -- Order 3: bột giặt
-(4, 23, 2);  -- Order 4: 2 dầu gội
+-- Item giao hàng
+Insert Into item_giaoHang (maGiaoHang, maSP, soLuong, maKhM) Values
+(1, 2, 2, NULL),
+(1, 3, 5, NULL),
+(2, 8, 3, 2),
+(3, 11, 2, NULL),
+(4, 15, 1, NULL);
 
--- Hóa đơn (chỉ cho đơn hàng đã giao)
-INSERT INTO hoaDon (maNV, maHoaDon, ngayThanhToan) VALUES
-(6, 1, '2024-12-18'),
-(7, 2, '2024-12-19');
+-- Hóa đơn
+Insert Into hoaDon (maNV, ngayThanhToan) Values
+(6, '2024-12-18'),
+(7, '2024-12-19'),
+(8, '2024-12-20'),
+(9, '2024-12-21');
 
--- Items hóa đơn với giá gốc và giá bán
-INSERT INTO item_hoaDon (maHoaDon, maSP, soLuong) VALUES
--- Hóa đơn 1 (giaoHang 1)
-(1, 1, 1),   -- thịt heo giá thường
-(1, 10, 2),  -- coca giá thường
-(1, 15, 1),    -- muối giá thường
--- Hóa đơn 2 (giaoHang 2)
-(2, 3, 1), -- cá hồi giảm giá 10k
-(2, 14, 3);  -- sữa tươi giảm giá 2k/hộp
+-- Item hóa đơn
+Insert Into item_hoaDon (maHoaDon, tenSP, gia, soLuong, phanTramGiam) Values
+(1, 'Cá thu tươi', 150000, 2, 0),
+(1, 'Rau cải xanh', 15000, 5, 0),
+(2, 'Kẹo Alpenliebe', 35000, 3, 15),
+(3, 'Dầu ăn Simply', 55000, 2, 0),
+(4, 'Dầu gội Head & Shoulders', 120000, 1, 0);
