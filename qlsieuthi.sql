@@ -1,6 +1,6 @@
 Drop Database If Exists QLBanHangSieuThi;
-Create Database QLBanHangSieuThi;
-Use QLBanHangSieuThi;
+Create Database QLSieuThi;
+Use QLSieuThi;
 
 -- ============ Tạo tables ============
 Drop Table If Exists taiKhoan;
